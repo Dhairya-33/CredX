@@ -31,7 +31,7 @@ function App() {
                 <span className="text-3xl font-black italic tracking-tighter leading-none">
                 TrustChain<span className="text-primary italic">X</span>
                 </span>
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 ml-1">L2 Identity Protocol</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30 ml-1">Autonomous Credential Network</span>
             </div>
           </div>
           

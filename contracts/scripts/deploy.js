@@ -1,16 +1,21 @@
 // scripts/deploy.js
-require('dotenv').config();
+const hre = require("hardhat");
+
 async function main() {
-  const [deployer] = await ethers.getSigners();
-  console.log('Deploying contracts with the account:', deployer.address);
-  const TrustChainSBT = await ethers.getContractFactory('TrustChainSBT');
-  const sbt = await TrustChainSBT.deploy();
-  await sbt.deployed();
-  console.log('TrustChainSBT deployed to:', sbt.address);
+  const [deployer] = await hre.ethers.getSigners();
+  console.log("Deploying VeriCertSBT with the account:", deployer.address);
+
+  const VeriCertSBT = await hre.ethers.getContractFactory("VeriCertSBT");
+  const sbt = await VeriCertSBT.deploy();
+
+  await sbt.waitForDeployment();
+
+  console.log("VeriCertSBT deployed to:", await sbt.getAddress());
 }
+
 main()
   .then(() => process.exit(0))
-  .catch(error => {
+  .catch((error) => {
     console.error(error);
     process.exit(1);
   });

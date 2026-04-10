@@ -1,39 +1,71 @@
-# TrustChainX — Autonomous Credential Intelligence Network
+# VeriCertX: Blockchain-Based Certificate Verification Platform
 
-TrustChainX is a Web3 + AI platform designed to replace traditional resumes with verifiable, intelligent on-chain trust profiles.
-
-## 🚀 Vision
-A future where resumes don't exist—only verifiable, intelligent, on-chain trust profiles powered by AI.
-
-## 🛠️ Architecture
-- **Blockchain:** Soulbound Tokens (SBT) on Polygon (Solidity + Hardhat).
-- **Storage:** IPFS (via Pinata/Mock Services).
-- **Backend:** Node.js + Express with an built-in AI Trust Score Engine.
-- **Frontend:** React + Vite + Tailwind + Framer Motion (Premium Dark Neon UI).
-
-## 🤖 AI Engine
-The AI engine calculates a **Trust Score (0-100)** based on:
-- Issuer reputation & credibility history.
-- Anomaly detection (duplicates, unrealistic issuance speed).
-- Predictive risk flags (Highly Trusted vs. High Risk).
-
-## 🚦 Getting Started
-
-### Backend
-1. `cd backend`
-2. `npm install`
-3. `node server.js`
-
-### Frontend
-1. `cd frontend`
-2. `npm install`
-3. `npm run dev`
-
-## 🏆 Hackathon Winning Edge
-- **Voice-to-Credential:** Issue certificates using voice commands.
-- **Dynamic SBTs:** Non-transferable identity badges.
-- **Premium Design:** Glassmorphism, Neon gradients, and smooth animations.
-- **Zero-Login Verification:** Instantly audit any wallet.
+VeriCertX is a Soulbound Token (SBT) and IPFS-powered platform designed to eliminate fake credentials through immutable, decentralized verification.
 
 ---
-Built with 💜 for the next-gen Web3 ecosystem.
+
+## 🚀 Running the Project
+
+Follow these steps to launch the platform locally:
+
+### 1. Backend API
+1. Open a terminal and navigate to the backend:  
+   `cd backend`
+2. Install dependencies:  
+   `npm install`
+3. (Optional) Create a `.env` file with your `PINATA_API_KEY`, `PINATA_SECRET_KEY`, and `PRIVATE_KEY` for real blockchain/IPFS usage.
+4. Start the server:  
+   `node server.js`  
+   *The API will be live at `http://localhost:5000`*
+
+### 2. Frontend (Vite)
+1. Open a new terminal and navigate to the frontend:  
+   `cd frontend`
+2. Install dependencies:  
+   `npm install`
+3. Start the development server:  
+   `npm run dev`  
+   *Visit the app at `http://localhost:5173`*
+
+---
+
+## 🧪 Testing Walkthrough
+
+Follow this flow to test all features of the VeriCertX MVP:
+
+### Step 1: Issue a Certificate (Admin Flow)
+1. In the app, click the **"Authority Port"** tab in the navigation.
+2. Fill out the form with:
+   - **Student Full Name**: E.g., "John Smith"
+   - **Wallet Address**: Use `0xdemo` for easy testing, or any valid Ethereum address.
+   - **Course Name**: E.g., "Advanced Blockchain Engineering"
+   - **Grade**: E.g., "A+"
+3. Click **"Issue Certificate"**.
+   - You will see a loading animation while the certificate is uploaded to IPFS and minted on the blockchain.
+   - A success message will appear with a Transaction Hash snippet.
+
+### Step 2: View Your Vault (User Flow)
+1. Click the **"Trust Profile"** tab.
+2. If you issued to `0xdemo`, the dashboard will automatically fetch your new certificate.
+3. Observe the **interactive NFT Card**:
+   - Locate the **"Verified on Blockchain"** badge.
+   - Scan the **QR Code** with your phone (links to the IPFS metadata).
+   - Check the **Activity Log** on the right for the minting event.
+
+### Step 3: Verify Publicly (Recruiter Flow)
+1. Click the **"Identity Audit"** tab.
+2. Enter the wallet address you used (e.g., `0xdemo`).
+3. Click **"Verify Certs"**.
+4. The **AI Trust Meter** will calculate a score based on the certificates found.
+5. Review the list of verified units to ensure they match the student's claims.
+
+---
+
+## 🛠️ Technology Stack
+- **Blockchain**: Solidity, Soulbound Tokens (ERC-721 based), Hardhat.
+- **Backend**: Node.js, Express, Ethers.js, IPFS (Pinata).
+- **Frontend**: React, Vite, Framer Motion, QR Code SVG.
+- **AI**: Custom heuristic Trust Engine for fraud detection.
+
+---
+Built for the future of verifiable achievements. 🎓✨

@@ -2,40 +2,40 @@
 const express = require('express');
 const router = express.Router();
 const trustEngine = require('../ai/trustEngine');
-const { mockIpfs, mockBlockchain } = require('../services/mockServices');
+const { uploadToIPFS } = require('../services/ipfsService');
+const { mintCert, getCerts } = require('../services/blockchainService');
 
 /**
- * @route POST /api/issueCredential
- * @desc Issue a new credential, store on IPFS, and mint SBT
+ * @route POST /api/issue-certificate
+ * @desc Issue a new certificate, store on IPFS, and mint SBT
  */
-router.post('/issueCredential', async (req, res) => {
+router.post('/issue-certificate', async (req, res) => {
   try {
-    const { name, wallet, course, issuer, grade, category } = req.body;
+    const { name, wallet, course, grade, date } = req.body;
+    console.log(`[API] Issuing certificate for ${name} to wallet ${wallet}...`);
     
     // 1. Prepare metadata
     const metadata = {
-      name,
-      wallet,
-      course,
-      issuer,
-      issueDate: new Date().toISOString(),
+      studentName: name,
+      walletAddress: wallet,
+      courseName: course,
       grade,
-      credentialType: 'Certification',
-      category: category || 'Skill',
-      history_log: [`Issued by ${issuer} on ${new Date().toLocaleDateString()}`]
+      issueDate: date || new Date().toISOString(),
+      issuer: "TrustChainX Authority",
+      description: "Official Academic Certificate issued on TrustChainX Blockchain"
     };
 
-    // 2. Upload to IPFS (Mock)
-    const ipfsCID = await mockIpfs.upload(metadata);
+    // 2. Upload to IPFS
+    const ipfsCID = await uploadToIPFS(metadata);
 
-    // 3. Mint SBT on Blockchain (Mock)
-    const txHash = await mockBlockchain.mint(wallet, ipfsCID, metadata.credentialType, metadata.category);
+    // 3. Mint SBT on Blockchain
+    const txHash = await mintCert(wallet, ipfsCID, name, course);
 
     res.json({
       success: true,
       ipfsCID,
       txHash,
-      message: "Credential issued successfully on-chain."
+      message: "Certificate issued and recorded on blockchain."
     });
   } catch (error) {
     console.error(error);
@@ -44,22 +44,21 @@ router.post('/issueCredential', async (req, res) => {
 });
 
 /**
- * @route GET /api/getTrustScore/:address
- * @desc Calculate and return the trust score for a specific wallet
+ * @route GET /api/certificates/:wallet
+ * @desc Fetch all certificates linked to a wallet
  */
-router.get('/getTrustScore/:address', async (req, res) => {
+router.get('/certificates/:wallet', async (req, res) => {
   try {
-    const { address } = req.params;
+    const { wallet } = req.params;
+    const certs = await getCerts(wallet);
     
-    // Fetch user credentials from blockchain (Mock)
-    const credentials = await mockBlockchain.getCredentials(address);
-    
-    // Calculate score using AI engine
-    const analysis = trustEngine.calculateScore(credentials, address);
+    // Add AI Trust Score for each/all
+    const analysis = trustEngine.calculateScore(certs, wallet);
 
     res.json({
-      address,
-      ...analysis
+      wallet,
+      certificates: certs,
+      analysis
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -67,33 +66,26 @@ router.get('/getTrustScore/:address', async (req, res) => {
 });
 
 /**
- * @route GET /api/verifyWallet/:address
- * @desc Get all credentials and AI verdict for a wallet
+ * @route GET /api/verify/:wallet
+ * @desc Return verification status + trust score
  */
-router.get('/verifyWallet/:address', async (req, res) => {
+router.get('/verify/:wallet', async (req, res) => {
   try {
-    const { address } = req.params;
-    const credentials = await mockBlockchain.getCredentials(address);
-    const analysis = trustEngine.calculateScore(credentials, address);
+    const { wallet } = req.params;
+    const certs = await getCerts(wallet);
+    const analysis = trustEngine.calculateScore(certs, wallet);
 
     res.json({
-      address,
-      credentials,
-      analysis,
-      verifiedAt: new Date().toISOString()
+      wallet,
+      isVerified: certs.length > 0,
+      trustScore: analysis.score,
+      verdict: analysis.verdict,
+      certificateCount: certs.length,
+      lastVerified: new Date().toISOString()
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }
-});
-
-/**
- * @route POST /api/detectFraud
- * @desc Check specific credential data for anomalies
- */
-router.post('/detectFraud', (req, res) => {
-  const result = trustEngine.detectFraud(req.body);
-  res.json(result);
 });
 
 module.exports = router;

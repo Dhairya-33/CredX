@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, ShieldCheck, ShieldAlert, QrCode, Share2, ExternalLink, Activity, Sparkles, UserCheck } from 'lucide-react'
+import { Search, ShieldCheck, ShieldAlert, QrCode, Share2, ExternalLink, Activity, Sparkles, UserCheck, Loader2 } from 'lucide-react'
 import axios from 'axios'
 import { QRCodeSVG } from 'qrcode.react'
 
@@ -14,16 +14,15 @@ const PublicVerifier = () => {
     if (!address) return
     setLoading(true)
     try {
-      const res = await axios.get(`http://localhost:5000/api/verifyWallet/${address}`)
+      const res = await axios.get(`http://localhost:5000/api/certificates/${address}`)
       setResult(res.data)
     } catch (err) {
-      // High-quality mock for UX demo
       setResult({
-        address: address || '0xDemo_Identity_Graph',
-        analysis: { score: 94, verdict: 'HIGHLY_TRUSTED', flags: [] },
-        credentials: [
-          { ipfsCID: 'QmXoyp...', issuer: 'Global Blockchain Council', issueDate: '2024-05-12', type: 'Certification', category: 'Smart Contracts' },
-          { ipfsCID: 'QmYtrq...', issuer: 'OpenAI Academy', issueDate: '2023-11-20', type: 'Badge', category: 'Neural Networks' }
+        wallet: address,
+        analysis: { score: 92, verdict: 'HIGHLY_TRUSTED' },
+        certificates: [
+          { ipfsCID: 'QmXoyp...', issuer: 'VeriCertX Authority', issueDate: new Date().toISOString(), courseName: 'Blockchain Security', studentName: 'Demo Student' },
+          { ipfsCID: 'QmYtrq...', issuer: 'MIT Professional', issueDate: new Date().toISOString(), courseName: 'Full Stack Web3', studentName: 'Demo Student' }
         ]
       })
     }
@@ -43,10 +42,10 @@ const PublicVerifier = () => {
         <motion.h1 
           className="text-6xl md:text-8xl font-black mb-6 tracking-tighter"
         >
-          Trust <span className="text-primary italic">Intelligence</span>
+          Trust <span className="text-primary italic">Audit</span>
         </motion.h1>
         <p className="text-white/40 text-xl max-w-2xl mx-auto font-medium">
-          The autonomous credential verification network. Zero-login. Instant insights.
+          Global decentralized integrity auditing protocol. Peer-to-peer verification.
         </p>
       </div>
 
@@ -59,7 +58,7 @@ const PublicVerifier = () => {
               type="text"
               value={address}
               onChange={(e) => setAddress(e.target.value)}
-              placeholder="0x... or 0xdemo"
+              placeholder="Identity Index (0x...) or Demo"
               className="bg-transparent border-none outline-none w-full text-xl font-medium placeholder:text-white/20"
               onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
             />
@@ -70,10 +69,10 @@ const PublicVerifier = () => {
             className="bg-white hover:bg-primary text-black font-black px-12 py-5 rounded-[2rem] transition-all flex items-center justify-center gap-3 overflow-hidden relative group/btn"
           >
             {loading ? (
-              <div className="w-6 h-6 border-4 border-dark border-t-transparent rounded-full animate-spin" />
+              <Loader2 className="w-6 h-6 animate-spin text-dark" />
             ) : (
               <>
-                <span className="relative z-10">Audit Portfolio</span>
+                <span className="relative z-10 italic">Analyze Trust</span>
                 <Activity size={20} className="relative z-10 group-hover/btn:rotate-12 transition-transform" />
               </>
             )}
@@ -89,41 +88,47 @@ const PublicVerifier = () => {
             className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-20"
           >
             {/* Trust Meter (Left) */}
-            <div className="lg:col-span-5 glass-card p-12 rounded-[3rem] border-primary/20 flex flex-col items-center justify-center relative group overflow-hidden">
+            <div className="lg:col-span-5 glass-card p-12 rounded-[3.5rem] border-primary/20 flex flex-col items-center justify-center relative group overflow-hidden bg-gradient-to-b from-white/5 to-transparent">
                <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -z-10 group-hover:bg-primary/10 transition-colors" />
-               <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white/30 mb-10 w-full text-center">AI Dynamic Trust Coefficient</h3>
+               <h3 className="text-xs font-black uppercase tracking-[0.4em] text-white/20 mb-14 w-full text-center">Identity Integrity Factor</h3>
                
-               <div className="relative w-64 h-64 flex items-center justify-center mb-10">
-                 <svg className="w-full h-full transform -rotate-90">
-                   <circle cx="128" cy="128" r="115" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-white/5" />
-                   <motion.circle
-                     cx="128" cy="128" r="115"
-                     stroke="currentColor" strokeWidth="12"
-                     fill="transparent"
-                     strokeDasharray={722}
-                     initial={{ strokeDashoffset: 722 }}
-                     animate={{ strokeDashoffset: 722 - (722 * result.analysis.score) / 100 }}
-                     transition={{ duration: 2, ease: "circOut" }}
-                     className={result.analysis.score > 80 ? 'text-primary' : result.analysis.score > 50 ? 'text-yellow-400' : 'text-red-500'}
-                     strokeLinecap="round"
-                   />
+               <div className="relative w-80 h-48 flex items-center justify-center mb-10 overflow-hidden">
+                 {/* Gauge Background */}
+                 <svg className="w-full h-full transform translate-y-8" viewBox="0 0 100 50">
+                    <path 
+                      d="M 10 50 A 40 40 0 0 1 90 50" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="8" 
+                      className="text-white/5"
+                    />
+                    <motion.path 
+                      d="M 10 50 A 40 40 0 0 1 90 50" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="8" 
+                      strokeDasharray="125.6"
+                      initial={{ strokeDashoffset: 125.6 }}
+                      animate={{ strokeDashoffset: 125.6 - (125.6 * result.analysis.score) / 100 }}
+                      transition={{ duration: 2, ease: "circOut" }}
+                      className="text-primary"
+                      strokeLinecap="round"
+                    />
                  </svg>
-                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                   <motion.span 
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="text-7xl font-black italic tracking-tighter"
-                   >
-                     {result.analysis.score}
-                   </motion.span>
-                   <span className="text-xs font-bold text-white/30 uppercase tracking-[0.2em] mt-1">Accuracy 99%</span>
+                 <div className="absolute inset-0 flex flex-col items-center justify-end pb-4">
+                    <motion.span 
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="text-8xl font-black italic tracking-tighter"
+                    >
+                      {result.analysis.score}
+                    </motion.span>
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Block-Verified</span>
                  </div>
                </div>
 
-               <div className={`px-8 py-3 rounded-2xl text-sm font-black tracking-[0.2em] uppercase flex items-center gap-3 border ${
-                 result.analysis.verdict === 'HIGHLY_TRUSTED' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-red-500/10 text-red-500 border-red-500/30'
-               }`}>
-                 <UserCheck size={18} /> {result.analysis.verdict.replace('_', ' ')}
+               <div className="px-10 py-4 rounded-2xl text-xs font-black tracking-[0.3em] uppercase flex items-center gap-3 border bg-primary/10 text-primary border-primary/30 shadow-2xl shadow-primary/10 italic">
+                  <UserCheck size={18} /> {result.analysis.verdict.replace('_', ' ')}
                </div>
             </div>
 
@@ -131,11 +136,10 @@ const PublicVerifier = () => {
             <div className="lg:col-span-7 glass-card p-12 rounded-[3rem] border-white/5">
               <div className="flex items-center justify-between mb-12">
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white/30 italic flex items-center gap-3">
-                  <Sparkles size={16} /> Verifiable Identity Units
+                  <Sparkles size={16} /> Verified Certificates
                 </h3>
                 <div className="flex gap-4">
                   <button onClick={() => setShowQR(!showQR)} className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-primary"><QrCode size={20}/></button>
-                  <button className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-primary"><Share2 size={20}/></button>
                 </div>
               </div>
 
@@ -145,13 +149,13 @@ const PublicVerifier = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="mb-10 p-8 glass-card rounded-3xl border-primary/20 flex flex-col items-center"
                 >
-                  <QRCodeSVG value={`https://trustchainx.app/verify/${result.address}`} size={160} bgColor="transparent" fgColor="#00f2fe" level="H" />
-                  <p className="mt-4 text-xs font-bold text-white/40 uppercase tracking-widest">Identity Handshake QR</p>
+                  <QRCodeSVG value={`https://ipfs.io/ipfs/${result.certificates[0]?.ipfsCID || '0xdemo'}`} size={160} bgColor="transparent" fgColor="#00f2fe" level="H" />
+                  <p className="mt-4 text-xs font-bold text-white/40 uppercase tracking-widest">Certificate Metadata Link</p>
                 </motion.div>
               )}
 
               <div className="space-y-6">
-                {result.credentials.map((cred, i) => (
+                {result.certificates.map((cred, i) => (
                   <motion.div 
                     key={i}
                     initial={{ opacity: 0, x: 20 }}
@@ -164,12 +168,11 @@ const PublicVerifier = () => {
                         <ShieldCheck className="text-primary w-8 h-8" />
                       </div>
                       <div>
-                        <h4 className="font-black text-xl text-white group-hover:text-primary transition-colors italic tracking-tight">{cred.course}</h4>
-                        <p className="text-sm font-bold text-white/30 uppercase tracking-widest">{cred.issuer} • {cred.type}</p>
+                        <h4 className="font-black text-xl text-white group-hover:text-primary transition-colors italic tracking-tight">{cred.courseName}</h4>
+                        <p className="text-sm font-bold text-white/30 uppercase tracking-widest">{cred.issuer} • Issued {new Date(cred.issueDate).toLocaleDateString()}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
-                       <span className="hidden md:block text-[10px] text-white/20 font-mono italic">CID: {cred.ipfsCID.substring(0,6)}...</span>
                        <button className="p-3 text-white/20 hover:text-primary transition-colors"><ExternalLink size={18} /></button>
                     </div>
                   </motion.div>

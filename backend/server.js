@@ -16,10 +16,10 @@ app.use('/api', apiRouter);
 
 app.get('/', (req, res) => {
   res.send({
-    message: "TrustChainX Autonomous Intelligence Network is Online",
+    message: "TrustChainX Credential Intelligence Network is Online",
     status: "Active",
-    version: "v1.0.4",
-    network: "Polygon Mumbai / Mainnet Ready"
+    version: "v2.0.0",
+    network: "Polygon Amoy / Mainnet Ready"
   });
 });
 
