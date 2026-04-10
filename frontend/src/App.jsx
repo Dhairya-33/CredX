@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Shield, LayoutDashboard, Search, PlusCircle, Activity, Globe, Zap, Bell } from 'lucide-react'
 import PublicVerifier from './components/PublicVerifier'
@@ -7,6 +7,13 @@ import UserDashboard from './components/UserDashboard'
 
 function App() {
   const [activeTab, setActiveTab] = useState('verifier')
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('verify')) {
+        setActiveTab('verifier')
+    }
+  }, [])
 
   const navItems = [
     { id: 'verifier', name: 'Identity Audit', icon: Search },

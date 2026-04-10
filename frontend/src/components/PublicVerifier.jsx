@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, ShieldCheck, ShieldAlert, QrCode, Share2, ExternalLink, Activity, Sparkles, UserCheck, Loader2 } from 'lucide-react'
 import axios from 'axios'
@@ -10,24 +10,33 @@ const PublicVerifier = () => {
   const [loading, setLoading] = useState(false)
   const [showQR, setShowQR] = useState(false)
 
-  const handleVerify = async () => {
-    if (!address) return
+  const handleVerify = useCallback(async (targetAddress) => {
+    const searchAddress = targetAddress || address;
+    if (!searchAddress) return
     setLoading(true)
     try {
-      const res = await axios.get(`http://localhost:5000/api/certificates/${address}`)
+      const res = await axios.get(`http://localhost:5000/api/certificates/${searchAddress}`)
       setResult(res.data)
     } catch (err) {
       setResult({
-        wallet: address,
+        wallet: searchAddress,
         analysis: { score: 92, verdict: 'HIGHLY_TRUSTED' },
         certificates: [
-          { ipfsCID: 'QmXoyp...', issuer: 'VeriCertX Authority', issueDate: new Date().toISOString(), courseName: 'Blockchain Security', studentName: 'Demo Student' },
-          { ipfsCID: 'QmYtrq...', issuer: 'MIT Professional', issueDate: new Date().toISOString(), courseName: 'Full Stack Web3', studentName: 'Demo Student' }
+          { ipfsCID: 'QmXoyp...', issuer: 'TrustChainX Authority', issueDate: new Date().toISOString(), courseName: 'Blockchain Security', studentName: 'Demo Student' }
         ]
       })
     }
     setLoading(false)
-  }
+  }, [address])
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const verifyAddr = params.get('verify');
+    if (verifyAddr) {
+        setAddress(verifyAddr);
+        handleVerify(verifyAddr);
+    }
+  }, [handleVerify]);
 
   return (
     <div className="max-w-6xl mx-auto pt-20 px-4">
@@ -149,8 +158,8 @@ const PublicVerifier = () => {
                   animate={{ opacity: 1, scale: 1 }}
                   className="mb-10 p-8 glass-card rounded-3xl border-primary/20 flex flex-col items-center"
                 >
-                  <QRCodeSVG value={`https://ipfs.io/ipfs/${result.certificates[0]?.ipfsCID || '0xdemo'}`} size={160} bgColor="transparent" fgColor="#00f2fe" level="H" />
-                  <p className="mt-4 text-xs font-bold text-white/40 uppercase tracking-widest">Certificate Metadata Link</p>
+                  <QRCodeSVG value={`${window.location.origin}/?verify=${result.wallet}`} size={160} bgColor="transparent" fgColor="#00f2fe" level="H" />
+                  <p className="mt-4 text-[10px] font-black text-primary uppercase tracking-[0.3em] bg-primary/10 px-4 py-2 rounded-full border border-primary/20">Official Audit Link</p>
                 </motion.div>
               )}
 
@@ -164,8 +173,13 @@ const PublicVerifier = () => {
                     className="flex items-center justify-between p-6 rounded-[2rem] bg-white/5 border border-white/5 hover:border-primary/30 hover:bg-white/[0.08] transition-all group"
                   >
                     <div className="flex items-center gap-6">
-                      <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <ShieldCheck className="text-primary w-8 h-8" />
+                      <div className="w-24 h-16 rounded-xl overflow-hidden bg-white/5 border border-white/10 group-hover:border-primary/50 transition-all">
+                        <img 
+                          src={`https://ipfs.io/ipfs/${cred.ipfsCID}`} 
+                          alt="Cert Preview"
+                          className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity"
+                          onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=SBT'; }}
+                        />
                       </div>
                       <div>
                         <h4 className="font-black text-xl text-white group-hover:text-primary transition-colors italic tracking-tight">{cred.courseName}</h4>

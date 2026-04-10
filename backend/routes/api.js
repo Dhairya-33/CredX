@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const trustEngine = require('../ai/trustEngine');
-const { uploadToIPFS } = require('../services/ipfsService');
+const { uploadToIPFS, uploadFileToIPFS } = require('../services/ipfsService');
 const { mintCert, getCerts } = require('../services/blockchainService');
 
 /**
@@ -11,31 +11,38 @@ const { mintCert, getCerts } = require('../services/blockchainService');
  */
 router.post('/issue-certificate', async (req, res) => {
   try {
-    const { name, wallet, course, grade, date } = req.body;
-    console.log(`[API] Issuing certificate for ${name} to wallet ${wallet}...`);
+    const { name, wallet, course, grade, date, imageData } = req.body;
+    console.log(`[API] Issuing visual certificate for ${name} to wallet ${wallet}...`);
     
-    // 1. Prepare metadata
-    const metadata = {
-      studentName: name,
-      walletAddress: wallet,
-      courseName: course,
-      grade,
-      issueDate: date || new Date().toISOString(),
-      issuer: "TrustChainX Authority",
-      description: "Official Academic Certificate issued on TrustChainX Blockchain"
-    };
+    let certificateCID;
 
-    // 2. Upload to IPFS
-    const ipfsCID = await uploadToIPFS(metadata);
+    if (imageData) {
+        // Handle Base64 Image
+        const buffer = Buffer.from(imageData.split(',')[1], 'base64');
+        const fileName = `Certificate-${name.replace(/\s+/g, '_')}-${Date.now()}.png`;
+        certificateCID = await uploadFileToIPFS(buffer, fileName);
+    } else {
+        // Fallback to JSON if no image provided
+        const metadata = {
+            studentName: name,
+            walletAddress: wallet,
+            courseName: course,
+            grade,
+            issueDate: date || new Date().toISOString(),
+            issuer: "TrustChainX Authority",
+            description: "Official Academic Certificate issued on TrustChainX Blockchain"
+        };
+        certificateCID = await uploadToIPFS(metadata);
+    }
 
-    // 3. Mint SBT on Blockchain
-    const txHash = await mintCert(wallet, ipfsCID, name, course);
+    // 3. Mint SBT on Blockchain with the Image CID
+    const txHash = await mintCert(wallet, certificateCID, name, course);
 
     res.json({
       success: true,
-      ipfsCID,
+      ipfsCID: certificateCID,
       txHash,
-      message: "Certificate issued and recorded on blockchain."
+      message: "Visual certificate issued and recorded on blockchain."
     });
   } catch (error) {
     console.error(error);

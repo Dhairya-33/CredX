@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Award, Clock, ChevronRight, Share2, Download, Filter, MapPin, ShieldCheck, Activity, Sparkles, Zap } from 'lucide-react'
+import { Award, Clock, ChevronRight, Share2, Download, Filter, MapPin, ShieldCheck, Activity, Sparkles, Zap, ExternalLink } from 'lucide-react'
 import axios from 'axios'
 import { QRCodeSVG } from 'qrcode.react'
 
@@ -40,6 +40,23 @@ const UserDashboard = () => {
         </div>
     </div>
   )
+
+  const handleDownload = async (cid, course) => {
+    try {
+      const response = await fetch(`https://ipfs.io/ipfs/${cid}`);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `TrustChainX_${course.replace(/\s+/g, '_')}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
 
   return (
     <div className="pt-20 space-y-16 pb-24">
@@ -114,23 +131,38 @@ const UserDashboard = () => {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1, type: 'spring' }}
-                  className="group relative rounded-[3.5rem] overflow-hidden bg-gradient-to-br from-white/[0.05] to-transparent border border-white/5 hover:border-primary/40 p-10 h-[500px] flex flex-col justify-between transition-all duration-500 shadow-2xl hover:shadow-primary/5 cursor-pointer perspective-1000"
+                  className="group relative rounded-[3.5rem] overflow-hidden bg-gradient-to-br from-white/[0.05] to-[#050510] border border-white/5 hover:border-primary/40 p-10 h-[500px] flex flex-col justify-between transition-all duration-500 shadow-2xl hover:shadow-primary/5 cursor-pointer perspective-1000"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  
-                  <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-100 transition-all duration-700 group-hover:rotate-12">
-                      <QRCodeSVG 
-                          value={`https://ipfs.io/ipfs/${cred.ipfsCID}`} 
-                          size={100} 
-                          bgColor="transparent" 
-                          fgColor="#00f2fe" 
+                  <div className="absolute inset-0 z-0 cursor-pointer group/img" onClick={() => window.open(`https://ipfs.io/ipfs/${cred.ipfsCID}`, '_blank')}>
+                      <img 
+                          src={`https://ipfs.io/ipfs/${cred.ipfsCID}`} 
+                          alt="Certificate"
+                          className="w-full h-full object-cover opacity-10 group-hover:opacity-100 transition-all duration-700 blur-[2px] group-hover:blur-0"
+                          onError={(e) => { e.target.style.display = 'none'; }}
                       />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#050510] via-transparent to-transparent opacity-80" />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+                         <div className="bg-primary/20 backdrop-blur-md border border-primary/40 px-6 py-3 rounded-full text-primary font-black uppercase text-[10px] tracking-widest flex items-center gap-2">
+                            <ExternalLink size={14} /> View Original
+                         </div>
+                      </div>
+                  </div>
+
+                  <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-100 transition-all duration-700 group-hover:rotate-12 z-20">
+                      <a href={`/?verify=${viewingAddress}`} className="cursor-pointer block hover:scale-110 transition-transform">
+                        <QRCodeSVG 
+                            value={`${window.location.origin}/?verify=${viewingAddress}`} 
+                            size={100} 
+                            bgColor="transparent" 
+                            fgColor="#00f2fe" 
+                        />
+                      </a>
                   </div>
   
                   <div className="space-y-8 relative z-10">
                       <div className="flex items-center gap-3">
                           <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                          <span className="inline-block text-[10px] font-black uppercase tracking-[0.4em] text-primary">Live SBT Instance</span>
+                          <span className="inline-block text-[10px] font-black uppercase tracking-[0.4em] text-primary">Visual Identity SBT</span>
                       </div>
                       <h3 className="text-5xl font-black leading-none group-hover:text-primary transition-colors tracking-tighter italic">{cred.courseName}</h3>
                   </div>
@@ -140,7 +172,12 @@ const UserDashboard = () => {
                         <div className="flex items-center gap-3 text-green-400 font-black text-[10px] uppercase tracking-widest bg-green-400/10 px-4 py-2 rounded-full">
                             <ShieldCheck size={14} /> Immutable On-Chain
                         </div>
-                        <button className="p-3 rounded-2xl bg-white/5 hover:bg-primary hover:text-dark transition-all"><Download size={18}/></button>
+                                                 <button 
+                             onClick={() => handleDownload(cred.ipfsCID, cred.courseName)}
+                             className="p-3 rounded-2xl bg-white/5 hover:bg-primary hover:text-dark transition-all"
+                         >
+                             <Download size={18}/>
+                         </button>
                       </div>
                       <div className="space-y-2">
                           <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Authority: {cred.issuer}</p>
